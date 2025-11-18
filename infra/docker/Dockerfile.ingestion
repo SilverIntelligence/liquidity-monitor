@@ -1,0 +1,37 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies including cron
+RUN apt-get update && apt-get install -y \
+    gcc \
+    postgresql-client \
+    cron \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY pyproject.toml ./
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -e .
+
+# Copy application code
+COPY db ./db
+COPY ingestion ./ingestion
+COPY scoring ./scoring
+COPY scripts ./scripts
+
+# Copy crontab file
+COPY infra/docker/crontab /etc/cron.d/ingestion-cron
+
+# Give execution rights on the cron job
+RUN chmod 0644 /etc/cron.d/ingestion-cron
+
+# Apply cron job
+RUN crontab /etc/cron.d/ingestion-cron
+
+# Create log file
+RUN touch /var/log/cron.log
+
+# Run cron in foreground
+CMD cron && tail -f /var/log/cron.log

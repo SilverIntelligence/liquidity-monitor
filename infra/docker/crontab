@@ -1,0 +1,24 @@
+# Precious Metals Liquidity Monitor Ingestion Schedule
+
+# ETF holdings - daily at 6:00 AM UTC
+0 6 * * * cd /app && python -m scripts.run_ingestor --type etf >> /var/log/cron.log 2>&1
+
+# COMEX inventory - daily at 7:00 AM UTC
+0 7 * * * cd /app && python -m scripts.run_ingestor --type comex >> /var/log/cron.log 2>&1
+
+# LBMA inventory - daily at 8:00 AM UTC (monthly data, but check daily)
+0 8 * * * cd /app && python -m scripts.run_ingestor --type lbma >> /var/log/cron.log 2>&1
+
+# CFTC CoT - weekly on Saturday at 3:00 PM UTC (data published Fridays)
+0 15 * * 6 cd /app && python -m scripts.run_ingestor --type cftc >> /var/log/cron.log 2>&1
+
+# Futures settlement - daily at 5:00 PM UTC (after market close)
+0 17 * * * cd /app && python -m scripts.run_ingestor --type futures >> /var/log/cron.log 2>&1
+
+# Dealer premiums - every hour
+0 * * * * cd /app && python -m scripts.run_ingestor --type premiums >> /var/log/cron.log 2>&1
+
+# Compute scores - every hour at :30
+30 * * * * cd /app && python -m scripts.compute_scores >> /var/log/cron.log 2>&1
+
+# Empty line required at end of file
