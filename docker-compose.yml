@@ -37,10 +37,7 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:password@postgres:5432/liquidity_monitor
-      DATABASE_URL_SYNC: postgresql://postgres:password@postgres:5432/liquidity_monitor
       REDIS_URL: redis://redis:6379/0
-      API_HOST: 0.0.0.0
-      API_PORT: 8000
       UVICORN_CMD_ARGS: "--host 0.0.0.0 --port 8000"
     depends_on:
       postgres:
@@ -51,10 +48,10 @@ services:
       - .:/app
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
       interval: 30s
-      timeout: 10s
-      retries: 3
+      timeout: 5s
+      retries: 5
       start_period: 40s
 
   scheduler:
@@ -63,7 +60,6 @@ services:
       dockerfile: infra/docker/Dockerfile.scheduler
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:password@postgres:5432/liquidity_monitor
-      DATABASE_URL_SYNC: postgresql://postgres:password@postgres:5432/liquidity_monitor
       REDIS_URL: redis://redis:6379/0
       USER_AGENT: "WallStreetSilver-LiquidityMonitor/0.1"
       SCRAPE_DELAY_SECONDS: 60
@@ -77,7 +73,7 @@ services:
     restart: unless-stopped
     command: ["python", "-m", "etl.jobs.hourly"]
     healthcheck:
-      test: ["CMD-SHELL", "pgrep -f 'python -m etl.jobs.hourly' || exit 1"]
+      test: ["CMD-SHELL", "pgrep -f 'etl.jobs.hourly' >/dev/null || exit 1"]
       interval: 60s
       timeout: 10s
       retries: 3
