@@ -106,3 +106,7 @@ jobs:
       - name: Build Scheduler image
         run: |
           docker build -f infra/docker/Dockerfile.scheduler -t liquidity-monitor-scheduler:test .
+
+      - name: Build Dashboard image
+        run: |
+          docker build -f infra/docker/Dockerfile.dashboard -t liquidity-monitor-dashboard:test .
