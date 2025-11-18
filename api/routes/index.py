@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import csv
 import io
 
+from api.cache import cache_response
 from db.models import Composite, ComponentType, Metal, Score, ETLRun
 from db.session import get_db
 
@@ -17,6 +18,7 @@ router = APIRouter()
 
 
 @router.get("/status")
+@cache_response(ttl=120, key_prefix="api:v1")
 async def get_status(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     """Get overall system status.
 
@@ -63,6 +65,7 @@ async def get_status(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
 
 
 @router.get("/metal/{symbol}/index/latest")
+@cache_response(ttl=180, key_prefix="api:v1")
 async def get_latest_index(
     symbol: str, db: AsyncSession = Depends(get_db)
 ) -> dict[str, Any]:
@@ -127,6 +130,7 @@ async def get_latest_index(
 
 
 @router.get("/metal/{symbol}/index/history")
+@cache_response(ttl=300, key_prefix="api:v1")
 async def get_index_history(
     symbol: str,
     start: str | None = Query(None, description="Start date (YYYY-MM-DD)"),

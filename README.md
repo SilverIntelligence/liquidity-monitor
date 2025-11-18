@@ -40,8 +40,8 @@ This system ingests data from multiple sources, computes normalized liquidity sc
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd app2
+   git clone https://github.com/SilverIntelligence/liquidity-monitor.git
+   cd liquidity-monitor
    ```
 
 2. **Create environment file**
